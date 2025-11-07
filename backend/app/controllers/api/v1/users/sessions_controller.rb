@@ -4,13 +4,11 @@ class Api::V1::Users::SessionsController < Devise::SessionsController
   private
 
   def respond_with(resource, _opts = {})
+    token = JWT.encode({ user_id: resource.id }, Rails.application.secret_key_base)
     render json: {
-      message: 'Logged in successfully.',
-      user: {
-        id: resource.id,
-        name: resource.name,
-        email: resource.email
-      }
+      message: 'Logged in successfully',
+      user: resource,
+      token: token
     }, status: :ok
   end
 
