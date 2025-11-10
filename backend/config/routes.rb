@@ -1,33 +1,40 @@
 Rails.application.routes.draw do
-  devise_for :users
   get "health/show"
   root to: "health#show"
 
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "/up", to: "health#show", as: :rails_health_check
-
-  # Defines the root path route ("/")
-  # root "posts#index"
 
   namespace :api do
     namespace :v1 do
+      # 🚨 Deviseの設定を全てこのブロック内で完結させます 🚨
       devise_for :users,
+        # sessions, registrationsは必要なのでskipしない
+        # passwords, confirmationsなど不要なものだけをskipします
+        skip: [:passwords, :confirmations],
+
+        # カスタムコントローラーを指定
+        controllers: {
+          sessions: 'api/v1/sessions',
+          registrations: 'api/v1/registrations'
+        },
+
+        # URLセグメントの調整: /api/v1/users/login ではなく /api/v1/login にするために path: ''
         path: '',
+
+        # パス名の変更: /sign_in や /registration ではなく /login や /signup を使う
         path_names: {
           sign_in: 'login',
           sign_out: 'logout',
           registration: 'signup'
-        },
-        controllers: {
-          sessions: 'api/v1/users/sessions',
-          registrations: 'api/v1/users/registrations'
         }
 
+      # 🚨 注意: devise_forがこれらのルートを生成するため、以下の行は削除します
+      # post 'login', to: 'sessions#create'
+      # delete 'logout', to: 'sessions#destroy'
+      # post 'signup', to: 'registrations#create'
+
       # 認証済ユーザー情報取得
-      get '/me', to: 'users#me'
+      get 'me', to: 'users#me'
 
       # 投稿とHooray!
       resources :posts, only: [:index, :create, :show, :destroy] do

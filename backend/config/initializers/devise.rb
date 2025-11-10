@@ -97,7 +97,8 @@ Devise.setup do |config|
   # Notice that if you are skipping storage for all authentication paths, you
   # may want to disable generating routes to Devise's sessions controller by
   # passing skip: :sessions to `devise_for` in your config/routes.rb
-  config.skip_session_storage = [:http_auth]
+  # config.skip_session_storage = [:http_auth]
+  config.skip_session_storage = [:jwt_authenticatable, :all]
 
   # By default, Devise cleans up the CSRF token on authentication to
   # avoid CSRF token fixation attacks. This means that, when using AJAX
@@ -264,6 +265,7 @@ Devise.setup do |config|
   #
   # The "*/*" below is required to match Internet Explorer requests.
   # config.navigational_formats = ['*/*', :html, :turbo_stream]
+  config.navigational_formats = []
 
   # The default HTTP method used to sign out a resource. Default is :delete.
   config.sign_out_via = :delete
@@ -315,8 +317,7 @@ Devise.setup do |config|
   config.jwt do |jwt|
     jwt.secret = Rails.application.credentials.devise_jwt_secret_key || ENV['DEVISE_JWT_SECRET_KEY']
     jwt.dispatch_requests = [
-      ['POST', %r{^/api/v1/login$}],
-      ['POST', %r{^/api/v1/signup$}]
+      ['POST', %r{^/api/v1/login$}]
     ]
     jwt.revocation_requests = [
       ['DELETE', %r{^/api/v1/logout$}]
